@@ -10,8 +10,11 @@ public class Principal {
         System.out.println("=== 🎬 SCREEN MATCH ===");
 
         while (true) {
-            System.out.println("\n1. Buscar película o serie por título");
-            System.out.println("2. Salir");
+            System.out.println("\n1. Buscar Película por título");
+            System.out.println("2. Buscar Serie por título");
+            System.out.println("3. Buscar por Actor o Término");
+            System.out.println("4. Buscar por imdID");
+            System.out.println("5. Salir");
             System.out.print("Elija una opción: ");
 
             int opcion = lectura.nextInt();
@@ -19,16 +22,49 @@ public class Principal {
 
             switch (opcion) {
                 case 1:
-                    System.out.print("Ingrese el título: ");
+                    System.out.print("Ingrese el título de la Película: ");
                     String titulo = lectura.nextLine();
-                    Titulo resultado = consumoApi.obtenerDatos(titulo); // A ConsumoAPI.java
+                    Titulo resultadoPelicula = consumoApi.buscarTitulo(titulo); // A ConsumoAPI.java
 
-                    if (resultado != null) {
-                        mostrarInformacion(resultado);
+                    if (resultadoPelicula != null) {
+                        mostrarInformacion(resultadoPelicula);
                     }
                     break;
 
                 case 2:
+                    System.out.print("Ingrese el título de la Serie: ");
+                    String serie = lectura.nextLine();
+                    Titulo resultadoSerie = consumoApi.buscarTitulo(serie); // A ConsumoAPI.java
+
+                    if (resultadoSerie != null) {
+                        mostrarInformacion(resultadoSerie);
+                    }
+                    break;
+
+                case 3:
+                    System.out.print("Ingrese el nombre del actor o término: ");
+                    String termino = lectura.nextLine();
+                    ResultadosBusqueda resultados = consumoApi.buscarPorTermino(termino);
+
+                    if (resultados != null && !resultados.getResultados().isEmpty()) {
+                        System.out.println("\n✅ Encontrados " + resultados.getTotalResultados() + " resultados:");
+                        for (TituloResumen item : resultados.getResultados()) {
+                            System.out.println("  • " + item);
+                        }
+                    }
+                    break;
+
+                case 4:
+                    System.out.print("Ingrese el imdbID a buscar: ");
+                    String imdbID = lectura.nextLine();
+                    Titulo resultadoImdbID = consumoApi.buscarImdbID(imdbID);
+
+                    if (resultadoImdbID != null) {
+                        mostrarInformacion(resultadoImdbID);
+                    }
+                    break;
+
+                case 5:
                     System.out.println("¡Gracias por usar Screen Match! 👋");
                     return;
 

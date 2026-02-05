@@ -10,7 +10,7 @@ import java.net.http.HttpResponse;
 
 public class PruebaOMDB {
     public static void main(String[] args) {
-        // 1. Clave API de OMDB reemplázalar
+        // 1. Clave API de OMDB
         String apiKey = "aa2f1ec7";
 
         // 2. Título a buscar
