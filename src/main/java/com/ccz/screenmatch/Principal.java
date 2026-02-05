@@ -13,7 +13,7 @@ public class Principal {
             System.out.println("\n1. Buscar Película por título");
             System.out.println("2. Buscar Serie por título");
             System.out.println("3. Buscar por Actor o Término");
-            System.out.println("4. Buscar por imdID");
+            System.out.println("4. Buscar por imdbID");
             System.out.println("5. Salir");
             System.out.print("Elija una opción: ");
 
@@ -51,17 +51,35 @@ public class Principal {
                         for (TituloResumen item : resultados.getResultados()) {
                             System.out.println("  • " + item);
                         }
+                        boolean salirMenuInterno = false; // Variable de control
+
+                        System.out.println("\n=== 🎬 ¿Desea ver detalles de alguna? ===");
+                        while (!salirMenuInterno) {
+                            System.out.println("\n1. Buscar imdbID");
+                            System.out.println("2. Volver al Menú Principal");
+                            System.out.print("Elija una opción: ");
+
+                            int opcion1 = lectura.nextInt();
+                            lectura.nextLine(); // Consumir el salto de línea
+
+                            switch (opcion1) {
+                                case 1:
+                                    buscarPorImdbID(lectura, consumoApi);
+                                    break;
+
+                                case 2:
+                                    salirMenuInterno = true; // Cambiamos a true para romper el while
+                                    break;
+
+                                default:
+                                    System.out.println("Opción no válida. Intente de nuevo.");
+                            }
+                        }
                     }
                     break;
 
                 case 4:
-                    System.out.print("Ingrese el imdbID a buscar: ");
-                    String imdbID = lectura.nextLine();
-                    Titulo resultadoImdbID = consumoApi.buscarImdbID(imdbID);
-
-                    if (resultadoImdbID != null) {
-                        mostrarInformacion(resultadoImdbID);
-                    }
+                    buscarPorImdbID(lectura, consumoApi);
                     break;
 
                 case 5:
@@ -71,6 +89,16 @@ public class Principal {
                 default:
                     System.out.println("Opción no válida. Intente de nuevo.");
             }
+        }
+    }
+
+    private static void buscarPorImdbID(Scanner lectura, ConsumoAPI consumoApi) {
+        System.out.print("Ingrese el imdbID a buscar: ");
+        String imdbID = lectura.nextLine();
+        Titulo resultadoImdbID = consumoApi.buscarImdbID(imdbID);
+
+        if (resultadoImdbID != null) {
+            mostrarInformacion(resultadoImdbID);
         }
     }
 

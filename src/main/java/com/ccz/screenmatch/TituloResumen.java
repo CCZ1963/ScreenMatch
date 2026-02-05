@@ -28,7 +28,8 @@ public class TituloResumen {
 
     @Override
     public String toString() {
-        return title + " (" + year + ") - [" + type + "]";
+        // Imprime los resultados de la búsqueda
+        return title + " (" + year + ") - [" + type + "] → imdbID: " + imdbId;
     }
 }
 
