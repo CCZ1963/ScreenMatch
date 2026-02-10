@@ -46,6 +46,9 @@ public abstract class Titulo {
     @SerializedName("imdbRating") // Asi en el JSON pero mejor ser explicitos
     protected String imdbRating;
 
+    @SerializedName("Type")
+    protected String type;
+
     @SerializedName("Ratings")
     protected List<Rating> ratings;
 
@@ -63,12 +66,14 @@ public abstract class Titulo {
     public String getLanguage() { return language; }
     public String getCountry() { return country; }
     public String getImdbRating() { return imdbRating; }
+    public String getType() { return type; }
     public List<Rating> getRatings() {
         return ratings != null ? ratings : new ArrayList<>();
         // Usamos new ArrayList<>() en el getter para evitar NullPointerException si no hay ratings.
     }
 
     @Override
+    // Imprime los resultados de la búsqueda
     public String toString() {
         return title + " (" + year + ") – IMDb: " + imdbRating;
     }

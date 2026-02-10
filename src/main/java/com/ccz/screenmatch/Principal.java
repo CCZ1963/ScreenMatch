@@ -1,11 +1,13 @@
 package com.ccz.screenmatch;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
     public static void main(String[] args) {
         Scanner lectura = new Scanner(System.in);
         ConsumoAPI consumoApi = new ConsumoAPI();
+        GestorHistorial gestorHistorial = new GestorHistorial();
 
         System.out.println("=== 🎬 SCREEN MATCH ===");
 
@@ -14,11 +16,16 @@ public class Principal {
             System.out.println("2. Buscar Serie por título");
             System.out.println("3. Buscar por Actor o Término");
             System.out.println("4. Buscar por imdbID");
-            System.out.println("5. Salir");
+            System.out.println("5. Ver historial (últimas 5)");
+            System.out.println("6. Salir");
             System.out.print("Elija una opción: ");
 
+            /* Anulada porque al ingresar letras daba error
+            Esperaba números, no letras, se cambio por leerOpcion{[}...}
             int opcion = lectura.nextInt();
             lectura.nextLine(); // Consumir el salto de línea
+            */
+            int opcion = leerOpcion(lectura);
 
             switch (opcion) {
                 case 1:
@@ -27,7 +34,12 @@ public class Principal {
                     Titulo resultadoPelicula = consumoApi.buscarTitulo(titulo); // A ConsumoAPI.java
 
                     if (resultadoPelicula != null) {
-                        mostrarInformacion(resultadoPelicula);
+                        if (resultadoPelicula instanceof Pelicula) {
+                            mostrarInformacion(resultadoPelicula);
+                            gestorHistorial.agregarBusqueda(resultadoPelicula);
+                        } else {
+                            System.out.println("❌ El resultado es una SERIE, no una película.");
+                        }
                     }
                     break;
 
@@ -37,7 +49,12 @@ public class Principal {
                     Titulo resultadoSerie = consumoApi.buscarTitulo(serie); // A ConsumoAPI.java
 
                     if (resultadoSerie != null) {
-                        mostrarInformacion(resultadoSerie);
+                        if (resultadoSerie instanceof Serie) {
+                            mostrarInformacion(resultadoSerie);
+                            gestorHistorial.agregarBusqueda(resultadoSerie);
+                        } else {
+                            System.out.println("❌ El resultado es una PELÍCULA, no una serie.");
+                        }
                     }
                     break;
 
@@ -55,16 +72,15 @@ public class Principal {
 
                         System.out.println("\n=== 🎬 ¿Desea ver detalles de alguna? ===");
                         while (!salirMenuInterno) {
-                            System.out.println("\n1. Buscar imdbID");
+                            System.out.println("\n1. Buscar por imdbID");
                             System.out.println("2. Volver al Menú Principal");
                             System.out.print("Elija una opción: ");
 
-                            int opcion1 = lectura.nextInt();
-                            lectura.nextLine(); // Consumir el salto de línea
+                            int opcion1 = leerOpcion(lectura);
 
                             switch (opcion1) {
                                 case 1:
-                                    buscarPorImdbID(lectura, consumoApi);
+                                    Titulo resultadoImdb = buscarPorImdbID(lectura, consumoApi);
                                     break;
 
                                 case 2:
@@ -79,10 +95,25 @@ public class Principal {
                     break;
 
                 case 4:
-                    buscarPorImdbID(lectura, consumoApi);
+                    Titulo resultadoImdbID = buscarPorImdbID(lectura, consumoApi);
+                    gestorHistorial.agregarBusqueda(resultadoImdbID); // ← añadir al historial
                     break;
 
                 case 5:
+                    if (gestorHistorial.estaVacio()) {
+                        System.out.println("📭 El historial está vacío.");
+                    } else {
+                        System.out.println("\n=== 📜 ÚLTIMAS BÚSQUEDAS ===");
+                        List<Titulo> ultimas = gestorHistorial.obtenerUltimas(5);
+                        for (int i = ultimas.size() - 1; i >= 0; i--) { // más reciente primero
+                            Titulo t = ultimas.get(i);
+                            System.out.println((ultimas.size() - i) + ". " + t.getTitle() + " (" + t.getYear() + ")");
+                        }
+                    }
+                    break;
+
+                case 6:
+                    gestorHistorial.guardarHistorial();
                     System.out.println("¡Gracias por usar Screen Match! 👋");
                     return;
 
@@ -92,7 +123,9 @@ public class Principal {
         }
     }
 
-    private static void buscarPorImdbID(Scanner lectura, ConsumoAPI consumoApi) {
+    //En Java, todo metodo debe declarar su tipo de retorno (incluso si es void).
+    //Como tu método devuelve un Titulo, debes escribirlo explícitamente.
+    private static Titulo buscarPorImdbID(Scanner lectura, ConsumoAPI consumoApi) {
         System.out.print("Ingrese el imdbID a buscar: ");
         String imdbID = lectura.nextLine();
         Titulo resultadoImdbID = consumoApi.buscarImdbID(imdbID);
@@ -100,6 +133,8 @@ public class Principal {
         if (resultadoImdbID != null) {
             mostrarInformacion(resultadoImdbID);
         }
+
+        return resultadoImdbID;
     }
 
     private static void mostrarInformacion(Titulo titulo) {
@@ -120,6 +155,18 @@ public class Principal {
         System.out.println("\nCríticas:");
         for (Rating r : titulo.getRatings()) {
             System.out.println("  • " + r);
+        }
+    }
+
+    // Validar la entrada por teclado
+    private static int leerOpcion(Scanner scanner) {
+        while (true) {
+            String input = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("❌ Entrada inválida. Por favor, ingrese un número: ");
+            }
         }
     }
 }

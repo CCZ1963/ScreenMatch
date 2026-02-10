@@ -9,13 +9,23 @@ public class TituloDeserializador implements JsonDeserializer<Titulo> {
     public Titulo deserialize(JsonElement json, Type type, JsonDeserializationContext context)
             throws JsonParseException {
 
-        // 1. Convertir el elemento JSON a un objeto (porque esperamos un objeto, no un array)
+        // Convertir el elemento JSON a un objeto (porque esperamos un objeto, no un array)
         JsonObject jsonObject = json.getAsJsonObject();
 
-        // 2. Obtener el valor del campo "Type"
-        String tipo = jsonObject.get("Type").getAsString();
+        // Verificar si la respuesta es un error
+        if (jsonObject.has("Response") && "False".equals(jsonObject.get("Response").getAsString())) {
+            throw new JsonParseException("OMDB API Error: " + jsonObject.get("Error").getAsString());
+        }
 
-        // 3. Decidir qué clase usar según el valor de "Type"
+        //  Obtener el valor del campo "Type"
+        JsonElement typeElement = jsonObject.get("Type");
+        if (typeElement == null || typeElement.isJsonNull()) {
+            throw new JsonParseException("Campo 'Type' no encontrado en la respuesta de OMDB");
+        }
+
+        String tipo = typeElement.getAsString();
+
+        // Decidir qué clase usar según el valor de "Type"
         if ("movie".equals(tipo)) {
             // Le pedimos al contexto que convierta el JSON completo a Pelicula
             return context.deserialize(json, Pelicula.class);
@@ -23,8 +33,9 @@ public class TituloDeserializador implements JsonDeserializer<Titulo> {
             // Lo mismo, pero para Serie
             return context.deserialize(json, Serie.class);
         } else {
-            // Opcional: manejar otros tipos (como "episode") o lanzar error
+            // Lo mismo, pero para Serie
             throw new JsonParseException("Tipo desconocido: " + tipo);
         }
     }
 }
+
